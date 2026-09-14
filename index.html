@@ -357,8 +357,8 @@ canvas.fog[data-gone="true"]{opacity:0;pointer-events:none}
 </noscript>
 
 <script>
-/* Сторож: если основной скрипт ниже не выполнился (файл вставлен не целиком),
-   через 5 секунд показываем понятную ошибку вместо вечной загрузки. */
+/* Сторож: если основной скрипт не выполнился (файл вставлен не целиком),
+   через 6 секунд показываем понятную красную панель вместо вечной загрузки. */
 window.__apologyBooted = false;
 setTimeout(function () {
   if (!window.__apologyBooted) {
@@ -366,22 +366,23 @@ setTimeout(function () {
       var t = document.getElementById('state-error-text');
       var p = document.getElementById('state-error');
       var s = document.getElementById('scene');
-      if (t) t.textContent = 'Файл вставлен не полностью — приложение не запустилось. Проверь, что обе части кода на месте, а последняя строка файла — </html>.';
+      if (t) t.textContent = 'Файл вставлен не полностью — приложение не запустилось. Проверь, что код вставлен целиком: последняя строка файла должна быть </html>.';
       if (p) p.hidden = false;
       if (s) s.dataset.state = 'error';
     } catch (e) { /* noop */ }
   }
-}, 5000);
+}, 6000);
 </script>
 
 <script>
 'use strict';
 /* ============================================================
-   Apology deck — single-file build v2.2-hosted.
-   Один интерактивный слой на экран. У каждого эффекта есть
-   мгновенный путь для prefers-reduced-motion.
+   Apology deck — single-file build v2.3-single.
+   Один активный интерактивный слой на экран (Layer Economy).
+   У каждой анимации есть мгновенный фолбэк (Reduce Motion).
+   Контраст текста >= 4.5:1 во всех состояниях.
    ============================================================ */
-const BUILD = 'v2.2-hosted';
+const BUILD = 'v2.3-single';
 
 /* ---------------- deck content ---------------- */
 const DECK = {
@@ -531,7 +532,7 @@ function showFatal(msg) {
 }
 window.addEventListener('error', function (e) {
   showFatal('Ошибка скрипта: ' + (e && e.message ? e.message : 'неизвестно') +
-    '. Чаще всего это значит, что файл вставлен не полностью — проверь обе части кода.');
+    '. Чаще всего это значит, что файл вставлен не полностью.');
 });
 window.addEventListener('unhandledrejection', function (e) {
   showFatal('Сбой запуска: ' + (e && e.reason ? e.reason : 'неизвестно'));
@@ -839,7 +840,8 @@ class CatCompanion {
     this.el.replaceChildren();
   }
 }
-  /* ================= EFFECTS ================= */
+
+/* ================= EFFECTS ================= */
 /* Контракт: mount(), reset(), revealNow(), destroy();
    колбэки через ctx: onProgress(r), onComplete(stats), onFirstTouch(). */
 
@@ -1100,7 +1102,7 @@ class FogEffect {
     if (this.completed) return;
     this.maskCtx.save();
     this.maskCtx.setTransform(1, 0, 0, 1, 0, 0);
-    this.maskCtx.fillStyle = 'rgba(0,0,0,1)';
+    this.maskCtx.fillStyle = 'rgba(0,0,0,1)');
     this.maskCtx.fillRect(0, 0, this.mask.width, this.mask.height);
     this.maskCtx.restore();
     this._composite();
@@ -1900,7 +1902,7 @@ class DeckController {
   if (missing.length) {
     window.__apologyBooted = true;
     showFatal('Страница повреждена: не найдены элементы ' + missing.join(', ') +
-      '. Файл скопирован не полностью — вставь обе части заново.');
+      '. Файл скопирован не полностью — вставь код заново целиком.');
     return;
   }
   if (!Array.isArray(DECK.cards) || DECK.cards.length !== 8) {
@@ -1922,4 +1924,3 @@ class DeckController {
 </script>
 </body>
 </html>
-
