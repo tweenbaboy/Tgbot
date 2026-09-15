@@ -1,4 +1,4 @@
-/* effects-more.js — Envelope, Typewriter, Polaroid, Steps */
+/* effects-more.js — Envelope, Typewriter, Yarn (cat rolls a ball) */
 class EnvelopeEffect {
   constructor(ctx) { this.ctx = ctx; this.opened = false; }
   mount() {
@@ -97,100 +97,16 @@ class TypewriterEffect {
   destroy() { clearInterval(this.timer); }
 }
 
-class PolaroidEffect {
-  constructor(ctx) { this.ctx = ctx; this.n = 0; }
+class YarnEffect {
+  constructor(ctx) { this.ctx = ctx; this.n = 0; this.dir = 1; this.rot = 0; }
   mount() {
     const c = this.ctx;
-    this.row = document.createElement('div');
-    this.row.className = 'pol-row';
-    this.pols = ['🌤', '', '🫂', '😊'].map((e) => {
-      const d = document.createElement('div');
-      d.className = 'pol';
-      d.style.setProperty('--tilt', (Math.random() * 12 - 6).toFixed(1) + 'deg');
-      d.innerHTML = '<div class="pol__ph">' + e + '</div>';
-      this.row.appendChild(d);
-      return d;
-    });
-    c.bodyEl.appendChild(this.row);
-    this.lines = makeLines(c.card, c.bodyEl);
-    c.cardEl.addEventListener('pointerdown', (e) => this.tap(e));
-    c.hint('Тапай — проявятся снимки (1/4)');
-  }
-  tap(e) {
-    if (this.n >= 4) return;
-    this.ctx.onFirstTouch();
-    this.pols[this.n].classList.add('is-on');
-    Host.haptic('light');
-    spawnHeart(e.clientX, e.clientY);
-    this.n++;
-    if (this.n < 4) {
-      this.ctx.hint('Тапай — проявятся снимки (' + (this.n + 1) + '/4)');
-      this.ctx.onProgress(this.n / 4 * 0.8);
-      return;
-    }
-    revealLines(this.lines, false);
-    setTimeout(() => { this.ctx.onProgress(1); this.ctx.onComplete(); }, 500);
-  }
-  revealNow() {
-    this.pols.forEach((p) => p.classList.add('is-on'));
-    this.n = 4;
-    revealLines(this.lines, true);
-    this.ctx.onProgress(1);
-    this.ctx.onComplete();
-  }
-  reset() {
-    this.n = 0;
-    this.pols.forEach((p) => p.classList.remove('is-on'));
-    this.lines.forEach((p) => p.classList.remove('is-visible'));
-    this.ctx.onProgress(0);
-  }
-  destroy() {}
-}
-
-class StepsEffect {
-  constructor(ctx) { this.ctx = ctx; this.n = 0; }
-  mount() {
-    const c = this.ctx;
-    this.box = document.createElement('div');
-    this.box.className = 'steps';
-    this.steps = [0, 1, 2].map(() => {
-      const d = document.createElement('div');
-      d.className = 'step';
-      d.textContent = '🐾';
-      this.box.appendChild(d);
-      return d;
-    });
-    c.bodyEl.appendChild(this.box);
-    this.lines = makeLines(c.card, c.bodyEl);
-    c.cardEl.addEventListener('pointerdown', () => this.tap());
-    c.hint('Тап — подняться на ступень (1/3)');
-  }
-  tap() {
-    if (this.n >= 3) return;
-    this.ctx.onFirstTouch();
-    this.steps[this.n].classList.add('is-on');
-    Host.haptic('medium');
-    this.n++;
-    if (this.n < 3) {
-      this.ctx.hint('Тап — подняться на ступень (' + (this.n + 1) + '/3)');
-      this.ctx.onProgress(this.n / 3 * 0.8);
-      return;
-    }
-    revealLines(this.lines, false);
-    setTimeout(() => { this.ctx.onProgress(1); this.ctx.onComplete(); }, 500);
-  }
-  revealNow() {
-    this.steps.forEach((s) => s.classList.add('is-on'));
-    this.n = 3;
-    revealLines(this.lines, true);
-    this.ctx.onProgress(1);
-    this.ctx.onComplete();
-  }
-  reset() {
-    this.n = 0;
-    this.steps.forEach((s) => s.classList.remove('is-on'));
-    this.lines.forEach((p) => p.classList.remove('is-visible'));
-    this.ctx.onProgress(0);
-  }
-  destroy() {}
-}
+    this.comp = new CatCompanion({ side: 'top', purr: c.purr });
+    c.bodyEl.appendChild(this.comp.el);
+    this.stage = document.createElement('div');
+    this.stage.className = 'yarn-stage';
+    this.thread = document.createElement('div');
+    this.thread.className = 'yarn-thread';
+    this.ball = document.createElement('div');
+    this.ball.className = 'yarn-ball';
+    this.ball.innerHTML = '<svg viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="26" fill="#c0554d"/><path d="M6 20 Q28 34
