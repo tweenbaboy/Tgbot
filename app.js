@@ -22,7 +22,9 @@ class DeckController {
     const r = this.r;
     const missing = Object.keys(r).filter((k) => !r[k]);
     if (missing.length) { showError('Не найдены элементы: ' + missing.join(', ') + '. Проверь, что index.html вставлен целиком.'); return; }
-    if (typeof EFFECTS === 'undefined') { showError('Не загружен реестр EFFECTS (effects-cat.js обрезан или отсутствует).'); return; }
+    let hasFx = false;
+    try { hasFx = typeof EFFECTS !== 'undefined' && !!EFFECTS; } catch (e) { hasFx = false; }
+    if (!hasFx) { showError('Не загружен реестр EFFECTS (effects-cat.js обрезан или отсутствует).'); return; }
     if (!DECK.cards.length) { r.scene.dataset.state = 'empty'; r.empty.classList.remove('hidden'); return; }
     if (DECK.cards.length !== 8) { showError('DECK.cards.length = ' + DECK.cards.length + ', ожидалось 8.'); return; }
     r.loader.classList.add('hidden');
