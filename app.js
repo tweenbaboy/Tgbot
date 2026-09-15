@@ -9,6 +9,7 @@ function pillBtn(t) {
 class DeckController {
   constructor() {
     this.i = 0; this.effect = null; this.cat = null;
+    this.finaleStage = 1;
     this.purr = createPurrAudio();
     this.muted = false;
     this.r = {
@@ -54,6 +55,19 @@ class DeckController {
     });
     this.r.reload.addEventListener('click', () => location.reload());
     this.r.restart.addEventListener('click', () => {
+      const thanks = $('finale-thanks');
+      const night = $('finale-night');
+      if (this.finaleStage === 1) {
+        this.finaleStage = 2;
+        if (thanks) thanks.classList.add('hidden');
+        if (night) night.classList.remove('hidden');
+        this.r.restart.textContent = 'Сначала';
+        return;
+      }
+      this.finaleStage = 1;
+      if (night) night.classList.add('hidden');
+      if (thanks) thanks.classList.remove('hidden');
+      this.r.restart.textContent = 'Ещё кое-что…';
       this.r.finale.classList.add('hidden');
       this.showCard(0);
     });
@@ -131,6 +145,12 @@ class DeckController {
       this.r.hint.classList.add('hidden');
       this.controls.classList.add('hidden');
       this.purr.set(0);
+      this.finaleStage = 1;
+      const thanks = $('finale-thanks');
+      const night = $('finale-night');
+      if (thanks) thanks.classList.remove('hidden');
+      if (night) night.classList.add('hidden');
+      this.r.restart.textContent = 'Ещё кое-что…';
       this.r.finale.classList.remove('hidden');
       this.r.meterFill.style.width = '100%';
       this.r.scene.dataset.state = 'finale';
