@@ -1,4 +1,4 @@
-/* effects-fog.js — FogEffect (wipe fog) + ScrollEffect (pull down) */
+/* effects-fog.js — FogEffect (wipe fog, text already under it) + ScrollEffect */
 class FogEffect {
   constructor(ctx) { this.ctx = ctx; this.done = false; this.brushing = false; }
   mount() {
@@ -10,6 +10,7 @@ class FogEffect {
     this.wrap.appendChild(this.canvas);
     c.cardEl.appendChild(this.wrap);
     this.lines = makeLines(c.card, c.bodyEl);
+    this.lines.forEach((p) => p.classList.add('is-visible'));
     this.makeGhost();
     this.ro = new ResizeObserver(() => { this.syncGhost(); this.resize(); });
     this.ro.observe(c.titleEl);
@@ -17,7 +18,7 @@ class FogEffect {
     this.resize();
     this.bind();
     this.timer = setInterval(() => this.sample(), 160);
-    c.hint('Три пальцем по дымке — проявятся слова');
+    c.hint('Три пальцем по дымке');
   }
   makeGhost() {
     this.ghost = document.createElement('h2');
@@ -123,7 +124,6 @@ class FogEffect {
     clearInterval(this.timer);
     this.wrap.classList.add('is-gone');
     if (this.ghost) { this.ghost.remove(); this.ghost = null; }
-    revealLines(this.lines, instant);
     this.ctx.onProgress(1);
     setTimeout(() => this.ctx.onComplete(), instant ? 0 : 650);
   }
@@ -135,7 +135,6 @@ class FogEffect {
     m.setTransform(1, 0, 0, 1, 0, 0);
     m.fillStyle = '#fff'; m.fillRect(0, 0, this.mask.width, this.mask.height);
     this.paint();
-    this.lines.forEach((p) => p.classList.remove('is-visible'));
     if (!this.ghost) { this.makeGhost(); this.syncGhost(); }
     clearInterval(this.timer);
     this.timer = setInterval(() => this.sample(), 160);
@@ -155,7 +154,7 @@ class ScrollEffect {
     const c = this.ctx;
     this.knob = document.createElement('div');
     this.knob.className = 'scroll-knob';
-    this.knob.textContent = '⌄⌄';
+    this.knob.textContent = '⌄';
     this.wrap = document.createElement('div');
     this.wrap.className = 'scroll-wrap';
     this.paper = document.createElement('div');
