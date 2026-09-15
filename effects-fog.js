@@ -96,3 +96,110 @@ class FogEffect {
     gr.addColorStop(1, 'rgba(0,0,0,0)');
     m.fillStyle = gr;
     m.beginPath(); m.arc(x, y, r, 0, 7); m.fill();
+    for (let i = 0; i < 3; i++) {
+      const a = Math.random() * 6.28, d = r * (0.6 + Math.random() * 0.5);
+      m.beginPath(); m.arc(x + Math.cos(a) * d, y + Math.sin(a) * d, r * 0.35, 0, 7); m.fill();
+    }
+    m.globalCompositeOperation = 'source-over';
+    this.paint();
+  }
+  sample() {
+    if (this.done || !this.mask) return;
+    const tw = 56, th = Math.max(8, Math.round(56 * this.h / this.w));
+    const t = document.createElement('canvas');
+    t.width = tw; t.height = th;
+    const g = t.getContext('2d');
+    g.drawImage(this.mask, 0, 0, tw, th);
+    const d = g.getImageData(0, 0, tw, th).data;
+    let cleared = 0;
+    for (let i = 3; i < d.length; i += 4) if (d[i] < 128) cleared++;
+    const ratio = cleared / (tw * th);
+    this.ctx.onProgress(Math.min(1, ratio / 0.42));
+    if (ratio >= 0.42) this.finish(false);
+  }
+  finish(instant) {
+    if (this.done) return;
+    this.done = true;
+    clearInterval(this.timer);
+    this.wrap.classList.add('is-gone');
+    if (this.ghost) { this.ghost.remove(); this.ghost = null; }
+    revealLines(this.lines, instant);
+    this.ctx.onProgress(1);
+    setTimeout(() => this.ctx.onComplete(), instant ? 0 : 650);
+  }
+  revealNow() { this.finish(true); }
+  reset() {
+    this.done = false;
+    this.wrap.classList.remove('is-gone');
+    const m = this.mask.getContext('2d');
+    m.setTransform(1, 0, 0, 1, 0, 0);
+    m.fillStyle = '#fff'; m.fillRect(0, 0, this.mask.width, this.mask.height);
+    this.paint();
+    this.lines.forEach((p) => p.classList.remove('is-visible'));
+    if (!this.ghost) { this.makeGhost(); this.syncGhost(); }
+    clearInterval(this.timer);
+    this.timer = setInterval(() => this.sample(), 160);
+    this.ctx.onProgress(0);
+  }
+  destroy() {
+    clearInterval(this.timer);
+    if (this.ro) this.ro.disconnect();
+    if (this.ghost) this.ghost.remove();
+    if (this.wrap) this.wrap.remove();
+  }
+}
+
+class ScrollEffect {
+  constructor(ctx) { this.ctx = ctx; this.done = false; this.y = null; this.moved = 0; }
+  mount() {
+    const c = this.ctx;
+    this.knob = document.createElement('div');
+    this.knob.className = 'scroll-knob';
+    this.knob.textContent = '⌄⌄';
+    this.wrap = document.createElement('div');
+    this.wrap.className = 'scroll-wrap';
+    this.paper = document.createElement('div');
+    this.paper.className = 'scroll-paper';
+    this.wrap.appendChild(this.paper);
+    c.bodyEl.appendChild(this.knob);
+    c.bodyEl.appendChild(this.wrap);
+    this.lines = makeLines(c.card, this.paper);
+    this.h0 = 70;
+    this.wrap.style.height = this.h0 + 'px';
+    requestAnimationFrame(() => { this.full = this.paper.scrollHeight + 2; });
+    this.wrap.addEventListener('pointerdown', (e) => {
+      this.y = e.clientY; this.moved = 0;
+      if (this.wrap.setPointerCapture) this.wrap.setPointerCapture(e.pointerId);
+    });
+    this.wrap.addEventListener('pointermove', (e) => {
+      if (this.y == null) return;
+      const dy = e.clientY - this.y;
+      this.y = e.clientY;
+      if (dy > 0) { this.moved += dy; this.add(dy); }
+    });
+    ['pointerup', 'pointercancel'].forEach((t) => this.wrap.addEventListener(t, () => {
+      if (this.moved < 6) this.add(90);
+      this.y = null;
+    }));
+    c.hint('Тяни свиток вниз (или тапни)');
+  }
+  add(d) {
+    if (this.done || !this.full) return;
+    this.ctx.onFirstTouch();
+    this.cur = clamp((this.cur || this.h0) + d, this.h0, this.full);
+    this.wrap.style.height = this.cur + 'px';
+    const p = (this.cur - this.h0) / Math.max(1, this.full - this.h0);
+    this.ctx.onProgress(p);
+    if (p >= 0.995) this.finish();
+  }
+  finish() {
+    if (this.done) return;
+    this.done = true;
+    Host.haptic('medium');
+    this.ctx.onProgress(1);
+    setTimeout(() => this.ctx.onComplete(), 300);
+  }
+  revealNow() { if (this.full) { this.cur = this.full; this.wrap.style.height = this.full + 'px'; } this.finish(); }
+  reset() { this.done = false; this.cur = this.h0; this.wrap.style.height = this.h0 + 'px'; this.ctx.onProgress(0); }
+  destroy() {}
+}
