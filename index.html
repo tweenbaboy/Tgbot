@@ -1,114 +1,62 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="light">
-<meta name="theme-color" content="#A9682F">
-<meta name="description" content="Для тебя. Восемь карточек — потри, нажми, погладь.">
-<title>Для тебя ❤️</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>
-  /* Ранний инит для будущего Mini App; вне Telegram — безвредно. */
-  (function () {
-    try {
-      var tg = window.Telegram && window.Telegram.WebApp;
-      if (!tg) return;
-      if (typeof tg.ready === 'function') tg.ready();
-      if (typeof tg.expand === 'function') tg.expand();
-      if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#A9682F');
-      if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#6E431F');
-      if (typeof tg.disableVerticalSwipes === 'function') tg.disableVerticalSwipes();
-    } catch (e) { /* noop */ }
-  })();
-</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Признание</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-<a class="skip-link" href="#card-body">К тексту</a>
-
-<main class="scene" id="scene" data-state="loading" data-reveal="">
-  <div class="scene__paper" aria-hidden="true"></div>
-  <div class="stage" id="stage"></div>
-
-  <div class="ui-top">
-    <button class="icon-btn" id="btn-sound" type="button" aria-pressed="true" aria-label="Звук мурчания: включён">🔊</button>
-  </div>
-
-  <div class="ui-bottom">
-    <p class="hint" id="hint" data-hidden="false"><span id="hint-text"></span></p>
-    <div class="meter" id="meter" data-active="false" aria-hidden="true"><span class="meter__fill" id="meter-fill"></span></div>
-    <button class="btn btn--skip" id="btn-skip" type="button">Показать сразу</button>
-  </div>
-
-  <section class="state-panel" id="state-error" hidden>
-    <div class="state-panel__box">
-      <h2 class="state-panel__title">Что-то пошло не так</h2>
-      <p class="state-panel__text" id="state-error-text">Обнови страницу — текст никуда не делся.</p>
-      <button class="btn btn--primary" id="btn-reload" type="button">Обновить</button>
+  <div id="scene" data-state="loading">
+    <div id="stage"></div>
+    <div id="hint" class="pill"><span id="hint-text">Загрузка...</span></div>
+    <div id="meter"><div id="meter-fill"></div></div>
+    <button id="btn-skip" class="icon-btn" aria-label="Показать сразу">⏭</button>
+    <button id="btn-sound" class="icon-btn" aria-label="Звук" aria-pressed="true">🔊</button>
+    
+    <div id="state-error" class="overlay hidden"><div id="state-error-text"></div></div>
+    <div id="state-empty" class="overlay hidden">Здесь пока пусто</div>
+    <div id="loader" class="overlay">Загрузка...</div>
+    
+    <div id="finale" class="overlay hidden">
+      <h1>❤️</h1>
+      <button id="btn-restart">Сначала</button>
     </div>
-  </section>
-
-  <section class="state-panel" id="state-empty" hidden>
-    <div class="state-panel__box">
-      <h2 class="state-panel__title">Здесь пока пусто</h2>
-      <p class="state-panel__text">В этой карточке нет текста.</p>
-    </div>
-  </section>
-
-  <div class="loader" id="loader" aria-hidden="true">
-    <div class="loader__dots"><span></span><span></span><span></span></div>
+    <div id="live" class="sr-only" aria-live="polite"></div>
   </div>
 
-  <div class="finale" id="finale" hidden>
-    <div class="finale__box">
-      <div class="finale__heart" aria-hidden="true">❤️</div>
-      <p class="finale__text">Ты досмотрела до конца.<br>Спасибо 💛</p>
-      <button class="btn btn--primary" id="btn-restart" type="button">Сначала</button>
-    </div>
-  </div>
-</main>
-
-<p class="sr-only" id="live" role="status" aria-live="polite"></p>
-
-<noscript>
-  <div style="max-width:34rem;margin:0 auto;padding:2rem 1.25rem;background:#fff8ee;color:#241505">
-    <h1 style="font-family:Georgia,serif">Для тебя</h1>
-    <p>Я не всегда умею правильно говорить о своих чувствах. Поэтому решил сказать это так. Без оправданий. Без «но». Просто от себя.</p>
-    <p>Прости меня за всё, чем я когда-либо делал тебе больно.</p>
-    <p>Я знаю, что у меня есть недостатки. Но ни одна моя ошибка не означает, что ты для меня не важна.</p>
-    <p>Мне важно то, что между нами. Важно твоё настроение. Твои чувства. Твои переживания. Твоя улыбка.</p>
-    <p>Я хочу постепенно показывать это поступками. Учиться лучше тебя слышать. Быть внимательнее. Беречь то, что у нас есть.</p>
-    <p>Спасибо тебе за всё хорошее, что ты принесла в мою жизнь. Я ценю это намного больше, чем иногда умею показать.</p>
-    <p>Я не хочу терять тебя. Я безумно люблю тебя 🥺❤️ Прости меня ❤️</p>
-    <p>Ты мой компас по жизни. Куда бы меня ни занесло — стрелка всегда указывает на тебя.</p>
-  </div>
-</noscript>
-
-<script>
-/* Сторож: если файлы не загрузились или вставлены не целиком —
-   через 6 секунд покажем понятную красную панель. */
-window.__apologyBooted = false;
-setTimeout(function () {
-  if (!window.__apologyBooted) {
-    try {
-      var t = document.getElementById('state-error-text');
-      var p = document.getElementById('state-error');
-      var s = document.getElementById('scene');
-      if (t) t.textContent = 'Приложение не запустилось: один из файлов отсутствует или вставлен не полностью (нужно 7 файлов: index.html, styles.css, core.js, deck.js, effects-fog.js, effects-more.js, app.js).';
-      if (p) p.hidden = false;
-      if (s) s.dataset.state = 'error';
-    } catch (e) { /* noop */ }
-  }
-}, 6000);
-</script>
-<script src="./core.js"></script>
-<script src="./deck.js"></script>
-<script src="./effects-fog.js"></script>
-<script src="./effects-more.js"></script>
-<script src="./app.js"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    if (window.Telegram && window.Telegram.WebApp) {
+      window.Telegram.WebApp.ready();
+      window.Telegram.WebApp.expand();
+      window.Telegram.WebApp.setHeaderColor('#A9682F');
+      window.Telegram.WebApp.setBackgroundColor('#6E431F');
+      window.Telegram.WebApp.disableVerticalSwipes();
+    }
+  </script>
+  
+  <script src="./core.js"></script>
+  <script src="./deck.js"></script>
+  <script src="./effects-fog.js"></script>
+  <script src="./effects-more.js"></script>
+  <script src="./app.js"></script>
+  
+  <script>
+    setTimeout(() => {
+      if (!window.__apologyBooted) {
+        const err = document.getElementById('state-error');
+        const txt = document.getElementById('state-error-text');
+        if (err && txt) {
+          txt.innerText = 'Ошибка: app.js обрезан или не загружен (нет window.__apologyBooted)';
+          err.classList.remove('hidden');
+          document.getElementById('scene').dataset.state = 'error';
+        }
+      }
+    }, 6000);
+  </script>
 </body>
 </html>
