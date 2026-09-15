@@ -89,8 +89,8 @@
 </noscript>
 
 <script>
-/* Сторож: если остальные файлы (core.js, effects-*.js, app.js) ещё не загружены
-   или вставлены не целиком — через 6 секунд покажем понятную красную панель. */
+/* Сторож: если файлы не загрузились или вставлены не целиком —
+   через 6 секунд покажем понятную красную панель. */
 window.__apologyBooted = false;
 setTimeout(function () {
   if (!window.__apologyBooted) {
@@ -98,7 +98,7 @@ setTimeout(function () {
       var t = document.getElementById('state-error-text');
       var p = document.getElementById('state-error');
       var s = document.getElementById('scene');
-      if (t) t.textContent = 'Приложение не запустилось: не хватает одного из файлов (styles.css, core.js, effects-fog.js, effects-more.js, app.js) или он вставлен не полностью. Сборка состоит из 6 файлов — добавь все.';
+      if (t) t.textContent = 'Приложение не запустилось: один из файлов отсутствует или вставлен не полностью (нужно 7 файлов: index.html, styles.css, core.js, deck.js, effects-fog.js, effects-more.js, app.js).';
       if (p) p.hidden = false;
       if (s) s.dataset.state = 'error';
     } catch (e) { /* noop */ }
@@ -106,6 +106,7 @@ setTimeout(function () {
 }, 6000);
 </script>
 <script src="./core.js"></script>
+<script src="./deck.js"></script>
 <script src="./effects-fog.js"></script>
 <script src="./effects-more.js"></script>
 <script src="./app.js"></script>
