@@ -1,4 +1,4 @@
-/* effects-fog.js — FogEffect (wipe fog, text already under it) + ScrollEffect */
+/* effects-fog.js — FogEffect (text visible under fog) + ScrollEffect (rods) */
 class FogEffect {
   constructor(ctx) { this.ctx = ctx; this.done = false; this.brushing = false; }
   mount() {
@@ -157,15 +157,22 @@ class ScrollEffect {
     this.knob.textContent = '⌄';
     this.wrap = document.createElement('div');
     this.wrap.className = 'scroll-wrap';
+    this.rodTop = document.createElement('div');
+    this.rodTop.className = 'scroll-rod scroll-rod--top';
     this.paper = document.createElement('div');
     this.paper.className = 'scroll-paper';
+    this.rodBot = document.createElement('div');
+    this.rodBot.className = 'scroll-rod';
+    this.wrap.appendChild(this.rodTop);
     this.wrap.appendChild(this.paper);
+    this.wrap.appendChild(this.rodBot);
     c.bodyEl.appendChild(this.knob);
     c.bodyEl.appendChild(this.wrap);
     this.lines = makeLines(c.card, this.paper);
     this.h0 = 70;
     this.wrap.style.height = this.h0 + 'px';
-    requestAnimationFrame(() => { this.full = this.paper.scrollHeight + 2; });
+    this.rodBot.style.top = (this.h0 - 10) + 'px';
+    requestAnimationFrame(() => { this.full = this.paper.scrollHeight + 8; });
     this.wrap.addEventListener('pointerdown', (e) => {
       this.y = e.clientY; this.moved = 0;
       if (this.wrap.setPointerCapture) this.wrap.setPointerCapture(e.pointerId);
@@ -187,6 +194,7 @@ class ScrollEffect {
     this.ctx.onFirstTouch();
     this.cur = clamp((this.cur || this.h0) + d, this.h0, this.full);
     this.wrap.style.height = this.cur + 'px';
+    this.rodBot.style.top = (this.cur - 10) + 'px';
     const p = (this.cur - this.h0) / Math.max(1, this.full - this.h0);
     this.ctx.onProgress(p);
     if (p >= 0.995) this.finish();
@@ -198,7 +206,20 @@ class ScrollEffect {
     this.ctx.onProgress(1);
     setTimeout(() => this.ctx.onComplete(), 300);
   }
-  revealNow() { if (this.full) { this.cur = this.full; this.wrap.style.height = this.full + 'px'; } this.finish(); }
-  reset() { this.done = false; this.cur = this.h0; this.wrap.style.height = this.h0 + 'px'; this.ctx.onProgress(0); }
+  revealNow() {
+    if (this.full) {
+      this.cur = this.full;
+      this.wrap.style.height = this.full + 'px';
+      this.rodBot.style.top = (this.full - 10) + 'px';
+    }
+    this.finish();
+  }
+  reset() {
+    this.done = false;
+    this.cur = this.h0;
+    this.wrap.style.height = this.h0 + 'px';
+    this.rodBot.style.top = (this.h0 - 10) + 'px';
+    this.ctx.onProgress(0);
+  }
   destroy() {}
 }
