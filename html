@@ -1,1 +1,68 @@
-
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Признание</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="./styles-fx.css">
+</head>
+<body>
+<a class="skip-link" href="#stage">К содержанию</a>
+<div id="scene" data-state="loading">
+  <div id="stage"></div>
+  <div id="meter" aria-hidden="true"><div id="meter-fill"></div></div>
+  <div class="topbar topbar--left">
+    <button id="btn-skip" class="icon-btn" aria-label="Показать сразу">⏭</button>
+  </div>
+  <div class="topbar">
+    <button id="btn-sound" class="icon-btn" aria-pressed="true" aria-label="Звук мурчания">🔊</button>
+    <button id="btn-reload" class="icon-btn hidden" aria-label="Перезагрузить">🔄</button>
+  </div>
+  <div id="hint" class="pill"><span id="hint-text">Загрузка…</span></div>
+  <div id="loader" class="overlay">Загрузка…</div>
+  <div id="state-empty" class="overlay hidden">Здесь пока пусто</div>
+  <div id="state-error" class="overlay hidden"><div id="state-error-text"></div></div>
+  <div id="finale" class="overlay hidden">
+    <div class="finale-heart" aria-hidden="true">❤️</div>
+    <p class="finale-text">Спасибо, что дочитала до конца</p>
+    <button id="btn-restart" class="pill pill-btn">Сначала</button>
+  </div>
+  <div id="live" class="sr-only" aria-live="polite"></div>
+</div>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+(function(){
+  var tg = window.Telegram && window.Telegram.WebApp;
+  if (!tg) return;
+  try {
+    tg.ready(); tg.expand();
+    if (tg.setHeaderColor) tg.setHeaderColor('#A9682F');
+    if (tg.setBackgroundColor) tg.setBackgroundColor('#6E431F');
+    if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
+  } catch(e){}
+})();
+</script>
+<script src="./core.js"></script>
+<script src="./cat.js"></script>
+<script src="./deck.js"></script>
+<script src="./effects-fog.js"></script>
+<script src="./effects-more.js"></script>
+<script src="./effects-cat.js"></script>
+<script src="./app.js"></script>
+<script>
+setTimeout(function(){
+  if (!window.__apologyBooted) {
+    var t = document.getElementById('state-error-text');
+    if (t) t.textContent = 'Сторож: app.js не запустился за 6 c. Проверь, что все 7 js-файлов на месте и не обрезаны.';
+    document.getElementById('state-error').classList.remove('hidden');
+    document.getElementById('btn-reload').classList.remove('hidden');
+    document.getElementById('scene').dataset.state = 'error';
+  }
+}, 6000);
+</script>
+</body>
+</html>
