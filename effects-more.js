@@ -109,4 +109,52 @@ class YarnEffect {
     this.thread.className = 'yarn-thread';
     this.ball = document.createElement('div');
     this.ball.className = 'yarn-ball';
-    this.ball.innerHTML = '<svg viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="26" fill="#c0554d"/><path d="M6 20 Q28 34
+    this.ball.innerHTML = '<svg viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="26" fill="#c0554d"/><path d="M6 20 Q28 34 50 18 M4 32 Q28 46 52 30 M10 44 Q28 54 46 42" stroke="#fff7ec" stroke-width="2.5" fill="none" opacity=".8"/></svg>';
+    this.stage.appendChild(this.thread);
+    this.stage.appendChild(this.ball);
+    c.bodyEl.appendChild(this.stage);
+    this.lines = makeLines(c.card, c.bodyEl);
+    c.cardEl.addEventListener('pointerdown', (e) => this.bat(e));
+    c.hint('Тапай — котик катает клубок (1/4)');
+  }
+  bat(e) {
+    if (this.n >= 4) return;
+    this.ctx.onFirstTouch();
+    this.n++;
+    this.dir *= -1;
+    const w = Math.max(0, this.stage.clientWidth - 56);
+    const x = this.dir > 0 ? w : 0;
+    this.rot += 360 * this.dir;
+    this.ball.style.transform = 'translateX(' + x + 'px) rotate(' + this.rot + 'deg)';
+    this.thread.style.width = x + 'px';
+    this.comp.el.classList.add('is-bat');
+    setTimeout(() => this.comp.el.classList.remove('is-bat'), 520);
+    Host.haptic('light');
+    spawnHeart(e.clientX, e.clientY);
+    if (this.n < 4) {
+      this.ctx.hint('Тапай — котик катает клубок (' + (this.n + 1) + '/4)');
+      this.ctx.onProgress(this.n / 4 * 0.8);
+      return;
+    }
+    revealLines(this.lines, false);
+    setTimeout(() => { this.ctx.onProgress(1); this.ctx.onComplete(); }, 500);
+  }
+  revealNow() {
+    this.n = 4;
+    const w = Math.max(0, this.stage.clientWidth - 56);
+    this.ball.style.transform = 'translateX(' + w + 'px) rotate(720deg)';
+    this.thread.style.width = w + 'px';
+    revealLines(this.lines, true);
+    this.ctx.onProgress(1);
+    this.ctx.onComplete();
+  }
+  reset() {
+    this.n = 0; this.dir = 1; this.rot = 0;
+    this.ball.style.transform = 'translateX(0) rotate(0)';
+    this.thread.style.width = '0';
+    this.lines.forEach((p) => p.classList.remove('is-visible'));
+    this.ctx.onProgress(0);
+    this.ctx.hint('Тапай — котик катает клубок (1/4)');
+  }
+  destroy() { if (this.comp) this.comp.destroy(); }
+}
