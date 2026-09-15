@@ -92,7 +92,10 @@ class DeckController {
     this.effect = new Cls(ctx);
     this.effect.mount();
     if (card.cat && card.effect !== 'cat-gate') {
-      this.cat = new CatCompanion({ side: card.cat, purr: this.purr });
+      this.cat = new CatCompanion({
+        side: card.cat, purr: this.purr,
+        bubble: i === 0 ? 'ты можешь меня гладить :з' : null
+      });
       this.cat.mount(r.stage);
     }
     r.hint.classList.remove('hidden');
@@ -145,7 +148,7 @@ class DeckController {
   function selfTest() {
     setTimeout(() => {
       const fx = (typeof EFFECTS !== 'undefined') ? EFFECTS : {};
-      const need = ['fog', 'envelope', 'typewriter', 'polaroid', 'steps', 'scroll', 'cat-gate', 'compass'];
+      const need = ['fog', 'envelope', 'typewriter', 'yarn', 'steps', 'scroll', 'cat-gate', 'compass'];
       const miss = need.filter((k) => !fx[k]);
       const proto = ['mount', 'reset', 'revealNow', 'destroy'];
       const bad = need.filter((k) => fx[k] && proto.some((m) => typeof fx[k].prototype[m] !== 'function'));
