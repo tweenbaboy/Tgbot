@@ -1,4 +1,4 @@
-/* cat.js — svg cat art + CatCompanion */
+/* cat.js — svg cat art + CatCompanion (idle life, bubble, purr) */
 function buildCatSvg() {
   return '<svg viewBox="0 0 120 110" aria-hidden="true">'
     + '<path d="M30 40 L24 14 L46 26 Z" fill="#6e431f"/>'
@@ -34,6 +34,7 @@ class CatCompanion {
     this.el = document.createElement('div');
     this.el.className = 'cat cat--' + this.side;
     this.el.innerHTML = buildCatSvg();
+    if (opts.bubble) this.showBubble(opts.bubble);
     this.el.addEventListener('pointerdown', (e) => {
       this.drag = true; this.last = [e.clientX, e.clientY];
       if (this.el.setPointerCapture) this.el.setPointerCapture(e.pointerId);
@@ -49,6 +50,28 @@ class CatCompanion {
     ['pointerup', 'pointercancel', 'pointerleave'].forEach((t) => {
       this.el.addEventListener(t, () => { this.drag = false; this.cool(); });
     });
+    this.idle = setInterval(() => this.idleAct(), 3400);
+  }
+  showBubble(text) {
+    this.hideBubble();
+    const b = document.createElement('div');
+    b.className = 'cat-bubble';
+    b.textContent = text;
+    this.el.appendChild(b);
+    this.bubble = b;
+  }
+  hideBubble() { if (this.bubble) { this.bubble.remove(); this.bubble = null; } }
+  idleAct() {
+    if (this.drag || !document.body.contains(this.el)) return;
+    if (Math.random() < 0.22) {
+      this.el.classList.add('is-blink');
+      setTimeout(() => this.el.classList.remove('is-blink'), 200);
+      return;
+    }
+    const modes = ['is-look-left', 'is-look-right', 'is-look-you', 'is-play'];
+    const m = modes[Math.floor(Math.random() * modes.length)];
+    this.el.classList.add(m);
+    setTimeout(() => this.el.classList.remove(m), 1200);
   }
   awake() {
     if (!this.el.classList.contains('is-awake')) { this.el.classList.add('is-awake'); Host.haptic('light'); }
@@ -58,6 +81,7 @@ class CatCompanion {
   pet(e) {
     this.pets++;
     this.el.classList.add('is-bliss');
+    this.hideBubble();
     Host.haptic('medium');
     spawnHeart(e.clientX, e.clientY);
     if (this.purr) this.purr.set(1);
@@ -68,5 +92,5 @@ class CatCompanion {
     if (this.purr) this.purr.set(0);
   }
   mount(parent) { parent.appendChild(this.el); }
-  destroy() { this.cool(); this.el.remove(); }
+  destroy() { clearInterval(this.idle); this.cool(); this.el.remove(); }
 }
